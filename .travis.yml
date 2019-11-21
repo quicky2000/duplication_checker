@@ -2,7 +2,7 @@ matrix:
   include:
     - os: linux
       sudo: required
-      dist: trusty
+      dist: bionic
       compiler: gcc
     - os: osx
 
@@ -29,6 +29,7 @@ before_install:
   - cd build
 
 script:
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then generate_makefile duplication_checker ; make ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then cmake $QUICKY_REPOSITORY/duplication_checker ; make ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then generate_makefile duplication_checker ; make ; mkdir cmake_build ; cd cmake_build ; fi
+  - cmake $QUICKY_REPOSITORY/duplication_checker
+  - make
 #EOF
