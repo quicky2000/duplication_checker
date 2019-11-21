@@ -1,10 +1,12 @@
-sudo: required
-dist: bionic
-language: cpp
-compiler:
-  - gcc
-#  - clang
+matrix:
+  include:
+    - os: linux
+      sudo: required
+      dist: trusty
+      compiler: gcc
+    - os: osx
 
+language: cpp
 
 before_install:
   - MY_LOCATION=`pwd`
@@ -27,6 +29,6 @@ before_install:
   - cd build
 
 script:
-  - generate_makefile duplication_checker
-  - make
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then generate_makefile duplication_checker ; make ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then cmake $QUICKY_REPOSITORY/duplication_checker ; make ; fi
 #EOF
