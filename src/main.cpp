@@ -16,127 +16,14 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
+#include "rule.h"
+#include "item.h"
 #include <fstream>
 #include <iostream>
 #include <vector>
 #include <set>
 #include <cassert>
 
-class rule
-{
-  public:
-
-    typedef enum class rule_cmd { RM_FIRST, RM_SECOND, IGNORE} t_rule_cmd;
-    inline rule(t_rule_cmd p_cmd, const std::string & p_path_1, const std::string & p_path_2);
-    inline t_rule_cmd get_cmd() const;
-    inline const std::string & get_path_1() const;
-    inline const std::string & get_path_2() const;
-    inline bool match(const std::string & p_path_1, const std::string & p_path_2) const;
-
-  private:
-
-    t_rule_cmd m_cmd;
-    std::string m_path_1;
-    std::string m_path_2;
-}
-;
-
-rule::rule(t_rule_cmd p_cmd, const std::string & p_path_1, const std::string & p_path_2)
-: m_cmd(p_cmd)
-, m_path_1(p_path_1)
-, m_path_2(p_path_2)
-{
-}
-
-rule::t_rule_cmd rule::get_cmd() const
-{
-    return m_cmd;
-}
-
-const std::string & rule::get_path_1() const
-{
-    return m_path_1;
-}
-
-const std::string & rule::get_path_2() const
-{
-    return m_path_2;
-}
-
-bool rule::match(const std::string & p_path_1, const std::string & p_path_2) const
-{
-    return m_path_1 == p_path_1 && m_path_2 == p_path_2;
-}
-
-class item
-{
-  public:
-    inline item( const std::string & p_sha1
-               , const std::string & p_complete_filename
-               );
-    inline const std::string & get_sha1() const;
-    inline const std::string & get_complete_filename() const;
-    inline const std::string & get_path() const;
-    inline const std::string & get_filename() const;
-    inline std::string get_despecialised_complete_filename() const;
-  private:
-    std::string m_sha1;
-    std::string m_complete_filename;
-    std::string m_path;
-    std::string m_filename;
-}
-;
-
-item::item( const std::string & p_sha1
-          , const std::string & p_complete_filename
-          )
-: m_sha1(p_sha1)
-, m_complete_filename( p_complete_filename)
-{
-    size_t l_last_separator_pos = m_complete_filename.rfind('/');
-    if(std::string::npos != l_last_separator_pos)
-    {
-        m_path = m_complete_filename.substr(0, l_last_separator_pos);
-        m_filename = m_complete_filename.substr(l_last_separator_pos + 1);
-    }
-    else
-    {
-        m_filename = m_complete_filename;
-    }
-    //std::cout << "\"" << m_path << "\"" << std::endl;
-    //std::cout << "\"" << m_filename << "\"" << std::endl;
-}
-
-const std::string & item::get_sha1() const
-{
-    return m_sha1;
-}
-
-const std::string & item::get_complete_filename() const
-{
-    return m_complete_filename;
-}
-
-const std::string & item::get_path() const
-{
-    return m_path;
-}
-
-const std::string & item::get_filename() const
-{
-    return m_filename;
-}
-
-std::string item::get_despecialised_complete_filename() const
-{
-    std::string l_result = m_complete_filename;
-    size_t l_pos = l_result.size() - 1;
-    while((l_pos = l_result.find_last_of("'` $()&;", l_pos)) != std::string::npos)
-    {
-	l_result.insert(l_pos, "\\");
-    }
-    return l_result;
-}
 
 int main()
 {

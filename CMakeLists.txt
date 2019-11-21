@@ -5,6 +5,8 @@ set(CMAKE_VERBOSE_MAKEFILE OFF)
 set(CMAKE_CXX_STANDARD 11)
 
 set(MY_SOURCE_FILES
+    include/rule.h
+    include/item.h
    )
 
 
