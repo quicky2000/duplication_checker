@@ -19,6 +19,7 @@
 #ifndef DUPLICATION_CHECKER_RULE_H
 #define DUPLICATION_CHECKER_RULE_H
 
+#include "quicky_exception.h"
 #include <string>
 
 class rule
@@ -50,6 +51,12 @@ class rule
     bool match( const std::string & p_path_1
               , const std::string & p_path_2
               ) const;
+
+    static inline
+    t_rule_cmd to_rule_cmd(const std::string & p_cmd_str);
+
+    static inline
+    std::string to_string(const t_rule_cmd p_rule_cmd);
 
   private:
 
@@ -95,5 +102,57 @@ bool rule::match( const std::string & p_path_1
     return m_path_1 == p_path_1 && m_path_2 == p_path_2;
 }
 
+//-----------------------------------------------------------------------------
+rule::t_rule_cmd
+rule::to_rule_cmd(const std::string & p_cmd_str)
+{
+    if("RM_FIRST" == p_cmd_str)
+    {
+        return t_rule_cmd::RM_FIRST;
+    }
+    else if("RM_SECOND" == p_cmd_str)
+    {
+        return t_rule_cmd::RM_SECOND;
+    }
+    else if("IGNORE" == p_cmd_str)
+    {
+        return t_rule_cmd::IGNORE;
+    }
+    throw quicky_exception::quicky_logic_exception("String \"" + p_cmd_str +  "\" is not a correct rule cmd"
+                                                  , __LINE__
+                                                  , __FILE__
+                                                  );
+}
+
+//-----------------------------------------------------------------------------
+std::string
+rule::to_string(const rule::t_rule_cmd p_rule_cmd)
+{
+    switch(p_rule_cmd)
+    {
+        case t_rule_cmd::RM_FIRST:
+            return "RM_FIRST";
+        case t_rule_cmd::RM_SECOND:
+            return "RM_SECOND";
+        case t_rule_cmd::IGNORE:
+            return "IGNORE";
+        default:
+            throw quicky_exception::quicky_logic_exception( "Unknown rule command value " + std::to_string((unsigned int)p_rule_cmd)
+                                                          , __LINE__
+                                                          , __FILE__
+                                                          );
+    }
+}
+
+#include <iostream>
+
+//-----------------------------------------------------------------------------
+std::ostream & operator<<( std::ostream & p_stream
+                         , rule::t_rule_cmd p_rule_cmd
+                         )
+{
+    p_stream << rule::to_string(p_rule_cmd);
+    return p_stream;
+}
 #endif //DUPLICATION_CHECKER_RULE_H
 // EOF

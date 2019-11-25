@@ -20,6 +20,7 @@ before_install:
   - echo $MY_LOCATION
   - cd $MY_LOCATION/repositories
   - git clone https://github.com/quicky2000/quicky_tools.git
+  - git clone https://github.com/quicky2000/quicky_exception.git
   - cd $MY_LOCATION/repositories
   - cd quicky_tools/setup
   - . setup.sh

@@ -16,7 +16,7 @@ set(MY_INCLUDE_DIRECTORIES
 
 #Create dependancy list
 set(DEPENDANCY_LIST "")
-#LIST(APPEND DEPENDANCY_LIST "quicky_exception")
+LIST(APPEND DEPENDANCY_LIST "quicky_exception")
 
 #------------------------------
 #- Generic part
