@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD 11)
 set(MY_SOURCE_FILES
     include/rule.h
     include/item.h
+    include/config_parser.h
    )
 
 
@@ -17,6 +18,7 @@ set(MY_INCLUDE_DIRECTORIES
 #Create dependancy list
 set(DEPENDANCY_LIST "")
 LIST(APPEND DEPENDANCY_LIST "quicky_exception")
+LIST(APPEND DEPENDANCY_LIST "EXT_xmlParser")
 
 #------------------------------
 #- Generic part

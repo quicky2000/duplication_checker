@@ -16,6 +16,7 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
+#include <config_parser.h>
 #include "rule.h"
 #include "item.h"
 #include <fstream>
@@ -60,6 +61,7 @@ int main()
         std::vector<item> l_items;
         std::vector<rule> l_rules;
 
+        duplication_checker::config_parser l_parser("config.xml", l_rules);
 
         std::set<std::pair<std::string, std::string> > l_proposed_rules;
 
@@ -118,7 +120,8 @@ int main()
                         {
                             if(l_proposed_rules.end() == l_proposed_rules.find(make_pair(l_items[0].get_path(), l_items[1].get_path())))
                             {
-                                std::cout << "  l_rules.push_back(rule(rule::t_rule_cmd::IGNORE, \"" << l_items[0].get_path() << "\", \"" << l_items[1].get_path() << "\"));" << std::endl;
+                                std::cout << "<rule cmd=\"IGNORE\" file1=\"" << l_items[0].get_path() << "\" file2=\"" << l_items[1].get_path() << "\" />" << std::endl;
+
                                 l_proposed_rules.insert(make_pair(l_items[0].get_path(), l_items[1].get_path()));
                             }
                         }
