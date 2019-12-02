@@ -109,6 +109,7 @@ int main()
                                     case rule::t_rule_cmd::IGNORE:
                                         break;
                                 }
+                                l_items.clear();
                                 break;
                             }
                         }
