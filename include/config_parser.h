@@ -24,6 +24,7 @@
 #include "quicky_exception.h"
 #include <string>
 #include <vector>
+#include <set>
 
 namespace duplication_checker
 {
@@ -33,24 +34,29 @@ namespace duplication_checker
 
         config_parser( const std::string & p_file_name
                      , std::vector<rule> & p_rules
+                     , std::set<std::string> & p_sha1_ignore_list
                      );
 
       private:
 
         void treat(const XMLNode & p_node);
         void treat_rule(const XMLNode & p_node);
+        void treat_ignore(const XMLNode & p_node);
         std::string get_mandatory_attribute( const XMLNode & p_node
                                            , const std::string & p_string
                                            ) const;
 
         std::vector<rule> & m_rules;
+        std::set<std::string> & m_sha1_ignore_list;
     };
 
     //-------------------------------------------------------------------------
     config_parser::config_parser( const std::string & p_file_name
                                 , std::vector<rule> & p_rules
+                                , std::set<std::string> & p_sha1_ignore_list
                                 )
     : m_rules(p_rules)
+    , m_sha1_ignore_list(p_sha1_ignore_list)
     {
         XMLResults l_err= {eXMLErrorNone,0,0};
         XMLNode l_node = XMLNode::parseFile( p_file_name.c_str(), "duplication_checker", &l_err);
@@ -89,7 +95,14 @@ namespace duplication_checker
         {
             treat_rule(p_node);
         }
-        else if("duplication_checker" == l_node_type || "rules" == l_node_type)
+        else if("ignore" == l_node_type)
+        {
+            treat_ignore(p_node);
+        }
+        else if("duplication_checker" == l_node_type ||
+                "rules" == l_node_type ||
+                "sha1_ignore_list" == l_node_type
+               )
         {
             for (int l_child_index = 0; l_child_index < p_node.nChildNode(); ++l_child_index)
             {
@@ -126,6 +139,14 @@ namespace duplication_checker
     }
 
     //-------------------------------------------------------------------------
+    void
+    config_parser::treat_ignore(const XMLNode & p_node)
+    {
+        std::string l_sha1_attribute = get_mandatory_attribute(p_node, "sha1");
+        m_sha1_ignore_list.emplace(l_sha1_attribute);
+    }
+
+    //-------------------------------------------------------------------------
     std::string
     config_parser::get_mandatory_attribute( const XMLNode & p_node
                                           , const std::string & p_string
@@ -141,6 +162,7 @@ namespace duplication_checker
         }
         return std::string(l_attribute);
     }
+
 }
 #endif //DUPLICATION_CHECKER_CONFIG_PARSER_H
 // EOF

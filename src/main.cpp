@@ -67,8 +67,8 @@ int main()
         std::string l_previous_sha1;
         std::vector<item> l_items;
         std::vector<rule> l_rules;
-
-        duplication_checker::config_parser l_parser("config.xml", l_rules);
+        std::set<std::string> l_sha1_ignore_list;
+        duplication_checker::config_parser l_parser("config.xml", l_rules, l_sha1_ignore_list);
 
         std::set<std::pair<std::string, std::string> > l_proposed_rules;
 
@@ -131,7 +131,10 @@ int main()
                     l_items.clear();
                     l_previous_sha1 = l_sha1;
                 }
-                l_items.push_back(item(l_sha1, l_complete_filename));
+                if(l_sha1_ignore_list.end() == l_sha1_ignore_list.find(l_sha1))
+                {
+                    l_items.push_back(item(l_sha1, l_complete_filename));
+                }
             }
             else if(l_items.size() >= 2)
             {
