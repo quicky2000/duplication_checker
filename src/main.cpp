@@ -99,11 +99,11 @@ int main()
                                 switch(l_iter_rule.get_cmd())
                                 {
                                     case rule::t_rule_cmd::RM_FIRST:
-                                        l_output_cmd_file << "# Rule : \"" << l_iter_rule.get_path_1() << "\" \"" << l_iter_rule.get_path_2() << "\"" << std::endl;
+                                        l_output_cmd_file << std::endl << "# Rule : \"" << l_iter_rule.get_path_1() << "\" \"" << l_iter_rule.get_path_2() << "\"" << std::endl;
                                         l_output_cmd_file << "rm " << l_items[0].get_despecialised_complete_filename() << std::endl;
                                         break;
                                     case rule::t_rule_cmd::RM_SECOND:
-                                        l_output_cmd_file << "# Rule : \"" << l_iter_rule.get_path_1() << "\" \"" << l_iter_rule.get_path_2() << "\"" << std::endl;
+                                        l_output_cmd_file << std::endl << "# Rule : \"" << l_iter_rule.get_path_1() << "\" \"" << l_iter_rule.get_path_2() << "\"" << std::endl;
                                         l_output_cmd_file << "rm " << l_items[1].get_despecialised_complete_filename() << std::endl;
                                         break;
                                     case rule::t_rule_cmd::IGNORE:
