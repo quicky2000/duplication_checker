@@ -25,6 +25,16 @@
 #include <set>
 #include <cassert>
 
+void print_items( std::ofstream & p_file
+                , const std::vector<item> & p_items
+                )
+{
+    p_file << std::endl;
+    for(auto l_iter:p_items)
+    {
+        p_file << l_iter.get_sha1() << "  " << l_iter.get_complete_filename() << std::endl;
+    }
+}
 
 int main()
 {
@@ -55,9 +65,6 @@ int main()
         }
         l_output_cmd_file << "#!/bin/bash" << std::endl;
         std::string l_previous_sha1;
-        std::string l_previous_complete_filename;
-        std::string l_previous_line;
-        bool l_new_duplicata = false;
         std::vector<item> l_items;
         std::vector<rule> l_rules;
 
@@ -78,19 +85,8 @@ int main()
                 std::string l_complete_filename = l_line.substr(l_space_pos + 2);
                 //std::cout << "\"" << l_sha1 << "\"" << std::endl;
                 //std::cout << "\"" << l_complete_filename << "\"" << std::endl;
-                if(l_sha1 == l_previous_sha1)
-                {
-                    if(l_new_duplicata)
-                    {
-                        l_output_file << std::endl;
-                        l_output_file << l_previous_line << std::endl;
-                        l_items.push_back(item(l_previous_sha1, l_previous_complete_filename));
-                        l_new_duplicata = false;
-                    }
-                    l_output_file << l_line << std::endl;
-                    l_items.push_back(item(l_sha1, l_complete_filename));
-                }
-                else
+
+                if(l_sha1 != l_previous_sha1)
                 {
                     if(2 == l_items.size())
                     {
@@ -121,17 +117,24 @@ int main()
                             if(l_proposed_rules.end() == l_proposed_rules.find(make_pair(l_items[0].get_path(), l_items[1].get_path())))
                             {
                                 std::cout << "<rule cmd=\"IGNORE\" file1=\"" << l_items[0].get_path() << "\" file2=\"" << l_items[1].get_path() << "\" />" << std::endl;
-
                                 l_proposed_rules.insert(make_pair(l_items[0].get_path(), l_items[1].get_path()));
                             }
                         }
                     }
-                    l_new_duplicata = true;
+
+                    if(l_items.size() >= 2)
+                    {
+                        print_items(l_output_file, l_items);
+                    }
+
                     l_items.clear();
+                    l_previous_sha1 = l_sha1;
                 }
-                l_previous_line = l_line;
-                l_previous_sha1 = l_sha1;
-                l_previous_complete_filename = l_complete_filename;
+                l_items.push_back(item(l_sha1, l_complete_filename));
+            }
+            else if(l_items.size() >= 2)
+            {
+                print_items(l_output_file, l_items);
             }
         }
         l_input_file.close();
