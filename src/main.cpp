@@ -184,10 +184,10 @@ int main()
     }
     catch(const quicky_exception::quicky_logic_exception & e)
     {
-        std::cout << "ERROR : " << e.what() << std::endl;
+        std::cout << "ERROR : " << e.what() << " from " << e.get_file() << ":" << e.get_line() << std::endl;
     }
     catch(const quicky_exception::quicky_runtime_exception & e)
     {
-        std::cout << "ERROR : " << e.what() << std::endl;
+        std::cout << "ERROR : " << e.what() << " from " << e.get_file() << ":" << e.get_line() << std::endl;
     }
 }
