@@ -8,6 +8,7 @@ set(MY_SOURCE_FILES
     include/rule.h
     include/item.h
     include/config_parser.h
+    include/keep_only.h
    )
 
 

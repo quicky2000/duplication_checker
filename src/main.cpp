@@ -19,6 +19,7 @@
 #include <config_parser.h>
 #include "rule.h"
 #include "item.h"
+#include "keep_only.h"
 #include <fstream>
 #include <iostream>
 #include <vector>
@@ -67,8 +68,9 @@ int main()
         std::string l_previous_sha1;
         std::vector<item> l_items;
         std::vector<rule> l_rules;
+        std::vector<duplication_checker::keep_only> l_keep_only;
         std::set<std::string> l_sha1_ignore_list;
-        duplication_checker::config_parser l_parser("config.xml", l_rules, l_sha1_ignore_list);
+        duplication_checker::config_parser l_parser("config.xml", l_rules, l_sha1_ignore_list, l_keep_only);
 
         std::set<std::pair<std::string, std::string> > l_proposed_rules;
 
@@ -125,7 +127,41 @@ int main()
 
                     if(l_items.size() >= 2)
                     {
-                        print_items(l_output_file, l_items);
+                        std::vector<std::string>  l_paths(l_items.size());
+                        unsigned int l_index = 0;
+                        for(auto const & l_iter:l_items)
+                        {
+                            l_paths[l_index] = l_iter.get_path();
+                            ++l_index;
+                        }
+                        bool l_matched = false;
+                        for(auto l_iter: l_keep_only)
+                        {
+                            if(l_iter.match(l_paths))
+                            {
+                                l_matched = true;
+                                for(auto const & l_iter_item:l_items)
+                                {
+                                    if(l_iter.is_to_keep(l_iter_item.get_path()))
+                                    {
+                                        l_output_cmd_file << std::endl << R"(# Keep only : ")" << l_iter_item.get_complete_filename() << R"(")" << std::endl;
+                                        break;
+                                    }
+                                }
+                                for(auto const & l_iter_item:l_items)
+                                {
+                                    if(!l_iter.is_to_keep(l_iter_item.get_path()))
+                                    {
+                                        l_output_cmd_file << "rm " << l_iter_item.get_despecialised_complete_filename() << std::endl;
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                        if(!l_matched)
+                        {
+                            print_items(l_output_file, l_items);
+                        }
                     }
 
                     l_items.clear();

@@ -21,6 +21,7 @@
 
 #include "xmlParser.h"
 #include "rule.h"
+#include "keep_only.h"
 #include "quicky_exception.h"
 #include <string>
 #include <vector>
@@ -35,12 +36,15 @@ namespace duplication_checker
         config_parser( const std::string & p_file_name
                      , std::vector<rule> & p_rules
                      , std::set<std::string> & p_sha1_ignore_list
+                     , std::vector<keep_only> & p_keep_only
                      );
 
       private:
 
         void treat(const XMLNode & p_node);
         void treat_rule(const XMLNode & p_node);
+        void treat_keep_only(const XMLNode & p_node);
+        void treat_remove(const XMLNode & p_node);
         void treat_ignore(const XMLNode & p_node);
         std::string get_mandatory_attribute( const XMLNode & p_node
                                            , const std::string & p_string
@@ -48,15 +52,18 @@ namespace duplication_checker
 
         std::vector<rule> & m_rules;
         std::set<std::string> & m_sha1_ignore_list;
+        std::vector<keep_only> & m_keep_only;
     };
 
     //-------------------------------------------------------------------------
     config_parser::config_parser( const std::string & p_file_name
                                 , std::vector<rule> & p_rules
                                 , std::set<std::string> & p_sha1_ignore_list
+                                , std::vector<keep_only> & p_keep_only
                                 )
     : m_rules(p_rules)
     , m_sha1_ignore_list(p_sha1_ignore_list)
+    , m_keep_only(p_keep_only)
     {
         XMLResults l_err= {eXMLErrorNone,0,0};
         XMLNode l_node = XMLNode::parseFile( p_file_name.c_str(), "duplication_checker", &l_err);
@@ -95,13 +102,22 @@ namespace duplication_checker
         {
             treat_rule(p_node);
         }
+        else if("keep_only" == l_node_type)
+        {
+            treat_keep_only(p_node);
+        }
         else if("ignore" == l_node_type)
         {
             treat_ignore(p_node);
         }
+        else if("remove" == l_node_type)
+        {
+            treat_remove(p_node);
+        }
         else if("duplication_checker" == l_node_type ||
                 "rules" == l_node_type ||
-                "sha1_ignore_list" == l_node_type
+                "sha1_ignore_list" == l_node_type ||
+                "remove_list"  == l_node_type
                )
         {
             for (int l_child_index = 0; l_child_index < p_node.nChildNode(); ++l_child_index)
@@ -161,6 +177,35 @@ namespace duplication_checker
                                                           );
         }
         return std::string(l_attribute);
+    }
+
+    //-------------------------------------------------------------------------
+    void
+    config_parser::treat_keep_only(const XMLNode & p_node)
+    {
+        std::string l_path_to_keep = get_mandatory_attribute(p_node, "path");
+        int l_nb_child = p_node.nChildNode();
+        if(1 != l_nb_child)
+        {
+            throw quicky_exception::quicky_logic_exception("Node keep_only should have on child instead of " + std::to_string(l_nb_child), __LINE__, __FILE__);
+        }
+        const XMLNode & l_child_node = p_node.getChildNode(0);
+        std::string l_child_name = l_child_node.getName();
+        if("remove_list" != l_child_name)
+        {
+            throw quicky_exception::quicky_logic_exception(R"(Node keep_only child should be name "remove_list" instead of ")" + l_child_name + R"(")", __LINE__, __FILE__);
+        }
+        m_keep_only.emplace_back(keep_only(l_path_to_keep));
+        treat(l_child_node);
+    }
+
+    //-------------------------------------------------------------------------
+    void
+    config_parser::treat_remove(const XMLNode & p_node)
+    {
+        std::string l_path = get_mandatory_attribute(p_node, "path");
+        assert(!m_keep_only.empty());
+        m_keep_only.back().add_to_remove(l_path);
     }
 
 }
