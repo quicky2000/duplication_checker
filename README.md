@@ -12,7 +12,7 @@ This tool detect Duplications by performing the following steps:
 
 ## How to use it
 
-`./check_duplication.bash`
+`./check_duplication.bash [target directory]`
 Run command displayed by check_duplication.bash
 Run clean_cmd.bash to remove duplication according to defined rules
 
