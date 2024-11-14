@@ -20,5 +20,5 @@ sed -e 's/ /\\ /g' $launch_directory/all_files.log | sed -e 's/^/sha1sum /g' | s
 echo "cd $launch_directory"  >> $launch_directory/cmd_all_files
 echo "Command generated"
 echo "Execute: "
-echo "source cmd_all_files; ./main.exe ; cp duplicata.log updated_duplicata.log ; kate updated_duplicata.log"
+echo "source cmd_all_files; ./duplication_checker ; cp duplicata.log updated_duplicata.log ; kate updated_duplicata.log"
 #EOF
