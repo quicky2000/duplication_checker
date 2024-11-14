@@ -20,6 +20,7 @@ before_install:
   - echo $MY_LOCATION
   - cd $MY_LOCATION/repositories
   - git clone https://github.com/quicky2000/quicky_tools.git
+  - git clone https://github.com/quicky2000/parameter_manager.git
   - git clone https://github.com/quicky2000/quicky_exception.git
   - git clone https://github.com/quicky2000/EXT_xmlParser.git
   - cd $MY_LOCATION/repositories
@@ -31,7 +32,9 @@ before_install:
   - cd build
 
 script:
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then generate_makefile duplication_checker ; make ; mkdir cmake_build ; cd cmake_build ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then generate_makefile duplication_checker ; make ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then cd $MY_LOCATION ; mkdir cmake_build ; cd cmake_build ; fi
   - cmake $QUICKY_REPOSITORY/duplication_checker
   - make
+#
 #EOF

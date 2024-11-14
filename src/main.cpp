@@ -16,7 +16,8 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-#include <config_parser.h>
+#include "parameter_manager.h"
+#include "config_parser.h"
 #include "rule.h"
 #include "item.h"
 #include "keep_only.h"
@@ -37,31 +38,44 @@ void print_items( std::ofstream & p_file
     }
 }
 
-int main()
+int main(int argc,char ** argv)
 {
     try
     {
+         // Defining application command line parameters
+        parameter_manager::parameter_manager l_param_manager("duplication_checker.exe", "--", 0);
+        parameter_manager::parameter_if l_input_dir_param("input_dir", true);
+        l_param_manager.add(l_input_dir_param);
+
+        // Treating parameters
+        l_param_manager.treat_parameters(argc,argv);
+
+        std::string l_input_dir = l_input_dir_param.value_set() ? l_input_dir_param.get_value<std::string>() : ".";
+
+        std::string l_input_file_name = l_input_dir + "/sorted_sha1sum.log";
         std::ifstream l_input_file;
-        l_input_file.open("sorted_sha1sum.log");
+        l_input_file.open(l_input_file_name);
         if(!l_input_file.is_open())
         {
-            std::cout << "Error opening input file" << std::endl;
+            std::cout << R"(Error opening input file ")" << l_input_file_name << R"(")" << std::endl;
             return -1;
         }
 
+        std::string l_output_file_name = "duplicata.log";
         std::ofstream l_output_file;
-        l_output_file.open("duplicata.log");
+        l_output_file.open(l_output_file_name);
         if(!l_output_file.is_open())
         {
-            std::cout << "Error opening output file" << std::endl;
+            std::cout << R"(Error opening output file ")" << l_output_file_name << R"(")" << std::endl;
             return -1;
         }
 
+        std::string l_output_cmd_file_name = "clean_cmd.bash";
         std::ofstream l_output_cmd_file;
-        l_output_cmd_file.open("clean_cmd.bash");
+        l_output_cmd_file.open(l_output_cmd_file_name);
         if(!l_output_cmd_file.is_open())
         {
-            std::cout << "Error opening output cmd file" << std::endl;
+            std::cout << R"(Error opening output cmd file ")" << l_output_cmd_file_name << R"(")" << std::endl;
             return -1;
         }
         l_output_cmd_file << "#!/bin/bash" << std::endl;
@@ -70,7 +84,8 @@ int main()
         std::vector<rule> l_rules;
         std::vector<duplication_checker::keep_only> l_keep_only;
         std::set<std::string> l_sha1_ignore_list;
-        duplication_checker::config_parser l_parser("config.xml", l_rules, l_sha1_ignore_list, l_keep_only);
+        std::string l_config_file_name = l_input_dir + "/config.xml";
+        duplication_checker::config_parser l_parser(l_config_file_name, l_rules, l_sha1_ignore_list, l_keep_only);
 
         std::set<std::pair<std::string, std::string> > l_proposed_rules;
 
