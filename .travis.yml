@@ -33,8 +33,10 @@ before_install:
 
 script:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then generate_makefile duplication_checker ; make ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then run_test.py $MY_LOCATION/repositories/duplication_checker/tests; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then cd $MY_LOCATION ; mkdir cmake_build ; cd cmake_build ; fi
   - cmake $QUICKY_REPOSITORY/duplication_checker
   - make
+  - run_test.py $MY_LOCATION/repositories/duplication_checker/tests
 #
 #EOF
