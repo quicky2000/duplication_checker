@@ -94,7 +94,7 @@ int main(int argc,char ** argv)
             std::string l_line;
             getline(l_input_file, l_line);
             //std::cout << "\"" << l_line << "\"" << std::endl;
-            if("" != l_line)
+            if(!l_line.empty())
             {
                 // Extract SHA1 and file name
                 size_t l_space_pos = l_line.find(' ');
