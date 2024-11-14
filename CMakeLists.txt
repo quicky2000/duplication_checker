@@ -5,6 +5,7 @@ set(CMAKE_VERBOSE_MAKEFILE OFF)
 set(CMAKE_CXX_STANDARD 11)
 
 set(MY_SOURCE_FILES
+    include/duplication_checker.h
     include/rule.h
     include/item.h
     include/config_parser.h
