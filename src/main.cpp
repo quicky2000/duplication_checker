@@ -81,6 +81,7 @@ int main()
             //std::cout << "\"" << l_line << "\"" << std::endl;
             if("" != l_line)
             {
+                // Extract SHA1 and file name
                 size_t l_space_pos = l_line.find(' ');
                 assert(std::string::npos != l_space_pos);
                 std::string l_sha1 = l_line.substr(0, l_space_pos);
@@ -88,16 +89,20 @@ int main()
                 //std::cout << "\"" << l_sha1 << "\"" << std::endl;
                 //std::cout << "\"" << l_complete_filename << "\"" << std::endl;
 
+                // Sha1 change detection
                 if(l_sha1 != l_previous_sha1)
                 {
+                    // 2 items with same Sha1
                     if(2 == l_items.size())
                     {
                         bool l_matched = false;
+                        // Search if there is a rule for this items
                         for(auto l_iter_rule: l_rules)
                         {
                             if(l_iter_rule.match(l_items[0].get_path(), l_items[1].get_path()))
                             {
                                 l_matched = true;
+                                // Apply rule
                                 switch(l_iter_rule.get_cmd())
                                 {
                                     case rule::t_rule_cmd::RM_FIRST:
@@ -117,6 +122,7 @@ int main()
                         }
                         if(!l_matched)
                         {
+                            // If there were no rules propose 1 that do nothing
                             if(l_proposed_rules.end() == l_proposed_rules.find(make_pair(l_items[0].get_path(), l_items[1].get_path())))
                             {
                                 std::cout << "<rule cmd=\"IGNORE\" file1=\"" << l_items[0].get_path() << "\" file2=\"" << l_items[1].get_path() << "\" />" << std::endl;
@@ -127,6 +133,7 @@ int main()
 
                     if(l_items.size() >= 2)
                     {
+                        // Create a list of paths corresponding to items
                         std::vector<std::string>  l_paths(l_items.size());
                         unsigned int l_index = 0;
                         for(auto const & l_iter:l_items)
@@ -135,11 +142,13 @@ int main()
                             ++l_index;
                         }
                         bool l_matched = false;
+                        // Search for a rule correspindg to this list of path
                         for(auto l_iter: l_keep_only)
                         {
                             if(l_iter.match(l_paths))
                             {
                                 l_matched = true;
+                                // If there is a rule generate the corresponding commands
                                 for(auto const & l_iter_item:l_items)
                                 {
                                     if(l_iter.is_to_keep(l_iter_item.get_path()))
@@ -158,6 +167,7 @@ int main()
                                 break;
                             }
                         }
+                        // If there is no rule, log the items as duplicated
                         if(!l_matched)
                         {
                             print_items(l_output_file, l_items);
