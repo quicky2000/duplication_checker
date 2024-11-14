@@ -31,7 +31,7 @@ void print_items( std::ofstream & p_file
                 )
 {
     p_file << std::endl;
-    for(auto l_iter:p_items)
+    for(const auto & l_iter:p_items)
     {
         p_file << l_iter.get_sha1() << "  " << l_iter.get_complete_filename() << std::endl;
     }
@@ -97,7 +97,7 @@ int main()
                     {
                         bool l_matched = false;
                         // Search if there is a rule for this items
-                        for(auto l_iter_rule: l_rules)
+                        for(const auto & l_iter_rule: l_rules)
                         {
                             if(l_iter_rule.match(l_items[0].get_path(), l_items[1].get_path()))
                             {
