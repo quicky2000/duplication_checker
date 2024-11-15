@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<duplication_checker>
+<sha1_ignore_list>
+<ignore sha1="bd1259b7714e0402f3ca67b566a28ee31d57e698" />
+</sha1_ignore_list>
+<rules>
+<rule cmd="RM_SECOND" file1="dir1" file2="dir2" />
+</rules>
+</duplication_checker>
