@@ -226,7 +226,7 @@ namespace duplication_checker
             // If there were no rules propose 1 that do nothing
             if(m_proposed_rules.end() == m_proposed_rules.find(make_pair(m_duplicated_items[0].get_path(), m_duplicated_items[1].get_path())))
             {
-                std::cout << "<rule cmd=\"IGNORE\" file1=\"" << m_duplicated_items[0].get_path() << "\" file2=\"" << m_duplicated_items[1].get_path() << "\" />" << std::endl;
+                std::cout << R"(<rule cmd="IGNORE" file1=")" << m_duplicated_items[0].get_path() << R"(" file2=")" << m_duplicated_items[1].get_path() << R"(" />)" << std::endl;
                 m_proposed_rules.insert(make_pair(m_duplicated_items[0].get_path(), m_duplicated_items[1].get_path()));
             }
             print_items(m_output_file, m_duplicated_items);
