@@ -165,7 +165,7 @@ namespace duplication_checker
                 }
                 if(m_sha1_ignore_list.end() == m_sha1_ignore_list.find(l_sha1))
                 {
-                    m_duplicated_items.push_back(item(l_sha1, l_complete_filename));
+                    m_duplicated_items.emplace_back(l_sha1, l_complete_filename);
                 }
             }
             else if(m_duplicated_items.size() >= 2)
