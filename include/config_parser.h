@@ -46,9 +46,12 @@ namespace duplication_checker
         void treat_keep_only(const XMLNode & p_node);
         void treat_remove(const XMLNode & p_node);
         void treat_ignore(const XMLNode & p_node);
-        std::string get_mandatory_attribute( const XMLNode & p_node
-                                           , const std::string & p_string
-                                           ) const;
+
+        static
+        std::string
+        get_mandatory_attribute( const XMLNode & p_node
+                               , const std::string & p_string
+                               );
 
         std::vector<rule> & m_rules;
         std::set<std::string> & m_sha1_ignore_list;
@@ -151,7 +154,7 @@ namespace duplication_checker
         std::string l_file1_attribute = get_mandatory_attribute(p_node, "file1");
         std::string l_file2_attribute = get_mandatory_attribute(p_node, "file2");
         rule::t_rule_cmd l_rule_cmd = rule::to_rule_cmd(l_cmd_attribute);
-        m_rules.emplace_back(rule(l_rule_cmd, l_file1_attribute, l_file2_attribute));
+        m_rules.emplace_back(l_rule_cmd, l_file1_attribute, l_file2_attribute);
     }
 
     //-------------------------------------------------------------------------
@@ -166,7 +169,7 @@ namespace duplication_checker
     std::string
     config_parser::get_mandatory_attribute( const XMLNode & p_node
                                           , const std::string & p_string
-                                          ) const
+                                          )
     {
         XMLCSTR l_attribute = p_node.getAttribute(p_string.c_str());
         if(nullptr == l_attribute)
@@ -176,7 +179,7 @@ namespace duplication_checker
                                                           , __FILE__
                                                           );
         }
-        return std::string(l_attribute);
+        return {l_attribute};
     }
 
     //-------------------------------------------------------------------------
@@ -195,7 +198,7 @@ namespace duplication_checker
         {
             throw quicky_exception::quicky_logic_exception(R"(Node keep_only child should be name "remove_list" instead of ")" + l_child_name + R"(")", __LINE__, __FILE__);
         }
-        m_keep_only.emplace_back(keep_only(l_path_to_keep));
+        m_keep_only.emplace_back(l_path_to_keep);
         treat(l_child_node);
     }
 
