@@ -1,0 +1,4 @@
+exe_file:duplication_checker
+args:--input_dir=<test_location>
+expected_stdout_string:1 path ignore imported
+#EOF

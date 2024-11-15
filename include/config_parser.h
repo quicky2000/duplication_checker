@@ -36,6 +36,7 @@ namespace duplication_checker
         config_parser( std::vector<rule> & p_rules
                      , std::set<std::string> & p_sha1_ignore_list
                      , std::vector<keep_only> & p_keep_only
+                     , std::set<std::string> & p_path_ignore_list
                      );
 
         inline
@@ -50,6 +51,10 @@ namespace duplication_checker
         void treat_remove(const XMLNode & p_node);
         void treat_ignore(const XMLNode & p_node);
 
+        inline
+        void
+        treat_ignore_path(const XMLNode & p_node);
+
         static
         std::string
         get_mandatory_attribute( const XMLNode & p_node
@@ -59,16 +64,19 @@ namespace duplication_checker
         std::vector<rule> & m_rules;
         std::set<std::string> & m_sha1_ignore_list;
         std::vector<keep_only> & m_keep_only;
+        std::set<std::string> & m_path_ignore_list;
     };
 
     //-------------------------------------------------------------------------
     config_parser::config_parser( std::vector<rule> & p_rules
                                 , std::set<std::string> & p_sha1_ignore_list
                                 , std::vector<keep_only> & p_keep_only
+                                , std::set<std::string> & p_path_ignore_list
                                 )
     : m_rules(p_rules)
     , m_sha1_ignore_list(p_sha1_ignore_list)
     , m_keep_only(p_keep_only)
+    , m_path_ignore_list(p_path_ignore_list)
     {
     }
 
@@ -103,6 +111,7 @@ namespace duplication_checker
 
         std::cout << std::to_string(m_rules.size()) + " rules imported" << std::endl;
         std::cout << std::to_string(m_sha1_ignore_list.size()) + " SHA1 ignore imported" << std::endl;
+        std::cout << std::to_string(m_path_ignore_list.size()) + " path ignore imported" << std::endl;
         std::cout << std::to_string(m_keep_only.size()) + " keep only imported" << std::endl;
     }
 
@@ -123,6 +132,10 @@ namespace duplication_checker
         {
             treat_ignore(p_node);
         }
+        else if("ignore_path" == l_node_type)
+        {
+            treat_ignore_path(p_node);
+        }
         else if("remove" == l_node_type)
         {
             treat_remove(p_node);
@@ -130,6 +143,7 @@ namespace duplication_checker
         else if("duplication_checker" == l_node_type ||
                 "rules" == l_node_type ||
                 "sha1_ignore_list" == l_node_type ||
+                "path_ignore_list" == l_node_type ||
                 "remove_list"  == l_node_type
                )
         {
@@ -173,6 +187,14 @@ namespace duplication_checker
     {
         std::string l_sha1_attribute = get_mandatory_attribute(p_node, "sha1");
         m_sha1_ignore_list.emplace(l_sha1_attribute);
+    }
+
+    //-------------------------------------------------------------------------
+    void
+    config_parser::treat_ignore_path(const XMLNode & p_node)
+    {
+        std::string l_str_attribute = get_mandatory_attribute(p_node, "str");
+        m_path_ignore_list.emplace(l_str_attribute);
     }
 
     //-------------------------------------------------------------------------

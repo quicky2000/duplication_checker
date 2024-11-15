@@ -97,6 +97,10 @@ namespace duplication_checker
          */
         std::set<std::pair<std::string, std::string> > m_proposed_rules;
 
+        /**
+         * String to define which path to ignore
+         */
+        std::set<std::string> m_path_ignore_list;
     };
 
     //-------------------------------------------------------------------------
@@ -113,7 +117,7 @@ namespace duplication_checker
         }
 
         std::string l_config_file_name = p_input_dir + "/config.xml";
-        config_parser l_parser(m_rules, m_sha1_ignore_list, m_keep_only);
+        config_parser l_parser(m_rules, m_sha1_ignore_list, m_keep_only, m_path_ignore_list);
         l_parser.parse(l_config_file_name);
 
         std::string l_output_file_name = "duplicata.log";
@@ -166,7 +170,17 @@ namespace duplication_checker
                 }
                 if(m_sha1_ignore_list.end() == m_sha1_ignore_list.find(l_sha1))
                 {
-                    m_duplicated_items.emplace_back(l_sha1, l_complete_filename);
+                    auto l_iter = std::find_if(m_path_ignore_list.begin()
+                                              ,m_path_ignore_list.end()
+                                              ,[&](const std::string & p_string) -> bool
+                                               {
+                                                  return std::string::npos != l_complete_filename.find(p_string);
+                                               }
+                                              );
+                    if(l_iter == m_path_ignore_list.end())
+                    {
+                        m_duplicated_items.emplace_back(l_sha1, l_complete_filename);
+                    }
                 }
             }
             else if(m_duplicated_items.size() >= 2)
