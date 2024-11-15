@@ -53,6 +53,9 @@ namespace duplication_checker
                    ,const std::vector<item> & p_items
                    );
 
+        void
+        process_duplicated();
+
         std::ifstream m_input_file;
 
         /**
@@ -80,6 +83,14 @@ namespace duplication_checker
          * Hash to ignore
          */
         std::set<std::string> m_sha1_ignore_list;
+
+        std::vector<item> m_duplicated_items;
+
+        /**
+         * Remember couple of paths for which rules has been proposed
+         */
+        std::set<std::pair<std::string, std::string> > m_proposed_rules;
+
     };
 
     //-------------------------------------------------------------------------
@@ -125,10 +136,6 @@ namespace duplication_checker
     duplication_checker::run()
     {
         std::string l_previous_sha1;
-        std::vector<item> l_items;
-
-        std::set<std::pair<std::string, std::string> > l_proposed_rules;
-
         while(!m_input_file.eof())
         {
             std::string l_line;
@@ -147,101 +154,108 @@ namespace duplication_checker
                 // Sha1 change detection
                 if(l_sha1 != l_previous_sha1)
                 {
-                    // 2 items with same Sha1
-                    if(2 == l_items.size())
-                    {
-                        bool l_matched = false;
-                        // Search if there is a rule for this items
-                        for(const auto & l_iter_rule: m_rules)
-                        {
-                            if(l_iter_rule.match(l_items[0].get_path(), l_items[1].get_path()))
-                            {
-                                l_matched = true;
-                                // Apply rule
-                                switch(l_iter_rule.get_cmd())
-                                {
-                                    case rule::t_rule_cmd::RM_FIRST:
-                                        m_output_cmd_file << std::endl << "# Rule : \"" << l_iter_rule.get_path_1() << "\" \"" << l_iter_rule.get_path_2() << "\"" << std::endl;
-                                        m_output_cmd_file << "rm " << l_items[0].get_despecialised_complete_filename() << std::endl;
-                                        break;
-                                    case rule::t_rule_cmd::RM_SECOND:
-                                        m_output_cmd_file << std::endl << "# Rule : \"" << l_iter_rule.get_path_1() << "\" \"" << l_iter_rule.get_path_2() << "\"" << std::endl;
-                                        m_output_cmd_file << "rm " << l_items[1].get_despecialised_complete_filename() << std::endl;
-                                        break;
-                                    case rule::t_rule_cmd::IGNORE:
-                                        break;
-                                }
-                                l_items.clear();
-                                break;
-                            }
-                        }
-                        if(!l_matched)
-                        {
-                            // If there were no rules propose 1 that do nothing
-                            if(l_proposed_rules.end() == l_proposed_rules.find(make_pair(l_items[0].get_path(), l_items[1].get_path())))
-                            {
-                                std::cout << "<rule cmd=\"IGNORE\" file1=\"" << l_items[0].get_path() << "\" file2=\"" << l_items[1].get_path() << "\" />" << std::endl;
-                                l_proposed_rules.insert(make_pair(l_items[0].get_path(), l_items[1].get_path()));
-                            }
-                        }
-                    }
-
-                    if(l_items.size() >= 2)
-                    {
-                        // Create a list of paths corresponding to items
-                        std::vector<std::string>  l_paths(l_items.size());
-                        unsigned int l_index = 0;
-                        for(auto const & l_iter:l_items)
-                        {
-                            l_paths[l_index] = l_iter.get_path();
-                            ++l_index;
-                        }
-                        bool l_matched = false;
-                        // Search for a rule corresponding to this list of path
-                        for(auto l_iter: m_keep_only)
-                        {
-                            if(l_iter.match(l_paths))
-                            {
-                                l_matched = true;
-                                // If there is a rule generate the corresponding commands
-                                for(auto const & l_iter_item:l_items)
-                                {
-                                    if(l_iter.is_to_keep(l_iter_item.get_path()))
-                                    {
-                                        m_output_cmd_file << std::endl << R"(# Keep only : ")" << l_iter_item.get_complete_filename() << R"(")" << std::endl;
-                                        break;
-                                    }
-                                }
-                                for(auto const & l_iter_item:l_items)
-                                {
-                                    if(!l_iter.is_to_keep(l_iter_item.get_path()))
-                                    {
-                                        m_output_cmd_file << "rm " << l_iter_item.get_despecialised_complete_filename() << std::endl;
-                                    }
-                                }
-                                break;
-                            }
-                        }
-                        // If there is no rule, log the items as duplicated
-                        if(!l_matched)
-                        {
-                            print_items(m_output_file, l_items);
-                        }
-                    }
-
-                    l_items.clear();
+                    process_duplicated();
                     l_previous_sha1 = l_sha1;
                 }
                 if(m_sha1_ignore_list.end() == m_sha1_ignore_list.find(l_sha1))
                 {
-                    l_items.push_back(item(l_sha1, l_complete_filename));
+                    m_duplicated_items.push_back(item(l_sha1, l_complete_filename));
                 }
             }
-            else if(l_items.size() >= 2)
+            else if(m_duplicated_items.size() >= 2)
             {
-                print_items(m_output_file, l_items);
+                process_duplicated();
             }
         }
+    }
+
+    //-------------------------------------------------------------------------
+    void
+    duplication_checker::process_duplicated()
+    {
+        // 2 items with same Sha1
+        if(2 == m_duplicated_items.size())
+        {
+            bool l_matched = false;
+            // Search if there is a rule for this items
+            for(const auto & l_iter_rule: m_rules)
+            {
+                if(l_iter_rule.match(m_duplicated_items[0].get_path(), m_duplicated_items[1].get_path()))
+                {
+                    l_matched = true;
+                    // Apply rule
+                    switch(l_iter_rule.get_cmd())
+                    {
+                        case rule::t_rule_cmd::RM_FIRST:
+                            m_output_cmd_file << std::endl << "# Rule : \"" << l_iter_rule.get_path_1() << "\" \"" << l_iter_rule.get_path_2() << "\"" << std::endl;
+                            m_output_cmd_file << "rm " << m_duplicated_items[0].get_despecialised_complete_filename() << std::endl;
+                            break;
+                        case rule::t_rule_cmd::RM_SECOND:
+                            m_output_cmd_file << std::endl << "# Rule : \"" << l_iter_rule.get_path_1() << "\" \"" << l_iter_rule.get_path_2() << "\"" << std::endl;
+                            m_output_cmd_file << "rm " << m_duplicated_items[1].get_despecialised_complete_filename() << std::endl;
+                            break;
+                        case rule::t_rule_cmd::IGNORE:
+                            break;
+                    }
+                    m_duplicated_items.clear();
+                    break;
+                }
+            }
+            if(!l_matched)
+            {
+                // If there were no rules propose 1 that do nothing
+                if(m_proposed_rules.end() == m_proposed_rules.find(make_pair(m_duplicated_items[0].get_path(), m_duplicated_items[1].get_path())))
+                {
+                    std::cout << "<rule cmd=\"IGNORE\" file1=\"" << m_duplicated_items[0].get_path() << "\" file2=\"" << m_duplicated_items[1].get_path() << "\" />" << std::endl;
+                    m_proposed_rules.insert(make_pair(m_duplicated_items[0].get_path(), m_duplicated_items[1].get_path()));
+                }
+            }
+        }
+
+        if(m_duplicated_items.size() >= 2)
+        {
+            // Create a list of paths corresponding to items
+            std::vector<std::string>  l_paths(m_duplicated_items.size());
+            unsigned int l_index = 0;
+            for(auto const & l_iter:m_duplicated_items)
+            {
+                l_paths[l_index] = l_iter.get_path();
+                ++l_index;
+            }
+            bool l_matched = false;
+            // Search for a rule corresponding to this list of path
+            for(auto l_iter: m_keep_only)
+            {
+                if(l_iter.match(l_paths))
+                {
+                    l_matched = true;
+                    // If there is a rule generate the corresponding commands
+                    for(auto const & l_iter_item:m_duplicated_items)
+                    {
+                        if(l_iter.is_to_keep(l_iter_item.get_path()))
+                        {
+                            m_output_cmd_file << std::endl << R"(# Keep only : ")" << l_iter_item.get_complete_filename() << R"(")" << std::endl;
+                            break;
+                        }
+                    }
+                    for(auto const & l_iter_item:m_duplicated_items)
+                    {
+                        if(!l_iter.is_to_keep(l_iter_item.get_path()))
+                        {
+                            m_output_cmd_file << "rm " << l_iter_item.get_despecialised_complete_filename() << std::endl;
+                        }
+                    }
+                    break;
+                }
+            }
+            // If there is no rule, log the items as duplicated
+            if(!l_matched)
+            {
+                print_items(m_output_file, m_duplicated_items);
+            }
+        }
+
+        m_duplicated_items.clear();
     }
 
     //-------------------------------------------------------------------------

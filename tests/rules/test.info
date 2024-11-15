@@ -1,4 +1,4 @@
 exe_file:duplication_checker
 args:--input_dir=<test_location>
-expected_stdout_string:0 rules imported
+expected_stdout_string:<rule cmd="IGNORE" file1="dir1" file2="dir2" />
 #EOF
