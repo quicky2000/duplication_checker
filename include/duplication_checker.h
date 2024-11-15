@@ -113,7 +113,8 @@ namespace duplication_checker
         }
 
         std::string l_config_file_name = p_input_dir + "/config.xml";
-        config_parser l_parser(l_config_file_name, m_rules, m_sha1_ignore_list, m_keep_only);
+        config_parser l_parser(m_rules, m_sha1_ignore_list, m_keep_only);
+        l_parser.parse(l_config_file_name);
 
         std::string l_output_file_name = "duplicata.log";
         m_output_file.open(l_output_file_name);

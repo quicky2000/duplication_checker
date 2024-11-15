@@ -33,11 +33,14 @@ namespace duplication_checker
     {
       public:
 
-        config_parser( const std::string & p_file_name
-                     , std::vector<rule> & p_rules
+        config_parser( std::vector<rule> & p_rules
                      , std::set<std::string> & p_sha1_ignore_list
                      , std::vector<keep_only> & p_keep_only
                      );
+
+        inline
+        void
+        parse(const std::string & p_file_name);
 
       private:
 
@@ -59,14 +62,19 @@ namespace duplication_checker
     };
 
     //-------------------------------------------------------------------------
-    config_parser::config_parser( const std::string & p_file_name
-                                , std::vector<rule> & p_rules
+    config_parser::config_parser( std::vector<rule> & p_rules
                                 , std::set<std::string> & p_sha1_ignore_list
                                 , std::vector<keep_only> & p_keep_only
                                 )
     : m_rules(p_rules)
     , m_sha1_ignore_list(p_sha1_ignore_list)
     , m_keep_only(p_keep_only)
+    {
+    }
+
+    //-------------------------------------------------------------------------
+    void
+    config_parser::parse(const std::string & p_file_name)
     {
         XMLResults l_err= {eXMLErrorNone,0,0};
         XMLNode l_node = XMLNode::parseFile( p_file_name.c_str(), "duplication_checker", &l_err);
@@ -77,23 +85,25 @@ namespace duplication_checker
             if(eXMLErrorFileNotFound == l_err.error)
             {
                 throw quicky_exception::quicky_runtime_exception( "File \"" + p_file_name + "\" not found"
-                                                                , __LINE__
-                                                                , __FILE__
-                                                                );
+                        , __LINE__
+                        , __FILE__
+                );
             }
             else
             {
                 std::string l_error_msg = XMLNode::getError(l_err.error);
                 throw quicky_exception::quicky_logic_exception( "\"" + l_error_msg + "\" at line " + std::to_string(l_err.nLine) + " and column " + std::to_string(l_err.nColumn) + " of file \"" + p_file_name + "\""
-                                                              , __LINE__
-                                                              , __FILE__
-                                                              );
+                        , __LINE__
+                        , __FILE__
+                );
             }
         }
 
         treat(l_node);
 
         std::cout << std::to_string(m_rules.size()) + " rules imported" << std::endl;
+        std::cout << std::to_string(m_sha1_ignore_list.size()) + " SHA1 ignore imported" << std::endl;
+        std::cout << std::to_string(m_keep_only.size()) + " keep only imported" << std::endl;
     }
 
     //-------------------------------------------------------------------------
