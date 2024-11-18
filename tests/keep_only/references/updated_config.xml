@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<duplication_checker>
+	<sha1_ignore_list>
+		<ignore sha1="bd1259b7714e0402f3ca67b566a28ee31d57e698"/>
+	</sha1_ignore_list>
+	<keep_only_list>
+		<keep_only path="dir2">
+			<remove_list>
+				<remove path=""/>
+				<remove path="dir1"/>
+			</remove_list>
+		</keep_only>
+	</keep_only_list>
+</duplication_checker>

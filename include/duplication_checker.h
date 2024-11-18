@@ -20,6 +20,7 @@
 #define DUPLICATION_CHECKER_DUPLICATION_CHECKER_H
 
 #include "config_parser.h"
+#include "config_dumper.h"
 #include "rule.h"
 #include "item.h"
 #include "keep_only.h"
@@ -188,6 +189,8 @@ namespace duplication_checker
                 process_duplicated();
             }
         }
+
+        config_dumper::dump("updated_config.xml", m_rules, m_keep_only, m_sha1_ignore_list, m_path_ignore_list);
     }
 
     //-------------------------------------------------------------------------

@@ -144,6 +144,7 @@ namespace duplication_checker
                 "rules" == l_node_type ||
                 "sha1_ignore_list" == l_node_type ||
                 "path_ignore_list" == l_node_type ||
+                "keep_only_list" == l_node_type ||
                 "remove_list"  == l_node_type
                )
         {

@@ -23,6 +23,7 @@
 #include <vector>
 #include <set>
 #include <cassert>
+#include <functional>
 
 namespace duplication_checker
 {
@@ -40,7 +41,17 @@ namespace duplication_checker
         inline
         bool match(const std::vector<std::string> & p_list);
 
-        inline bool is_to_keep(const std::string & p_name);
+        inline
+        bool is_to_keep(const std::string & p_name);
+
+        inline
+        const std::string &
+        get_to_keep() const;
+
+        inline
+        void
+        apply_to_remove(std::function<void(const std::string &)> & p_func) const;
+
       private:
 
         /**
@@ -96,5 +107,23 @@ namespace duplication_checker
     {
         return p_name == m_to_keep;
     }
+
+    //-------------------------------------------------------------------------
+    const std::string &
+    keep_only::get_to_keep() const
+    {
+        return m_to_keep;
+    }
+
+    //-------------------------------------------------------------------------
+    void
+    keep_only::apply_to_remove(std::function<void(const std::string &)> & p_func) const
+    {
+        for(const auto & l_iter: m_to_remove)
+        {
+            p_func(l_iter);
+        }
+    }
+
 }
 #endif //DUPLICATION_CHECKER_KEEP_ONLY_H
