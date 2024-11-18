@@ -30,6 +30,7 @@ class rule
     { RM_FIRST
     , RM_SECOND
     , IGNORE
+    , SKIP
     } t_rule_cmd;
 
     inline
@@ -118,6 +119,10 @@ rule::to_rule_cmd(const std::string & p_cmd_str)
     {
         return t_rule_cmd::IGNORE;
     }
+    else if("SKIP" == p_cmd_str)
+    {
+        return t_rule_cmd::SKIP;
+    }
     throw quicky_exception::quicky_logic_exception("String \"" + p_cmd_str +  "\" is not a correct rule cmd"
                                                   , __LINE__
                                                   , __FILE__
@@ -136,6 +141,8 @@ rule::to_string(const rule::t_rule_cmd p_rule_cmd)
             return "RM_SECOND";
         case t_rule_cmd::IGNORE:
             return "IGNORE";
+        case t_rule_cmd::SKIP:
+            return "SKIP";
         default:
             throw quicky_exception::quicky_logic_exception( "Unknown rule command value " + std::to_string((unsigned int)p_rule_cmd)
                                                           , __LINE__

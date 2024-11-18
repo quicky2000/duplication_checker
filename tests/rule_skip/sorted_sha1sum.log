@@ -1,0 +1,7 @@
+307d8bfc0cad9bde5ed3e65c3235a5c43ef396ac  dir1/triple1.txt
+307d8bfc0cad9bde5ed3e65c3235a5c43ef396ac  dir2/triple2.txt
+307d8bfc0cad9bde5ed3e65c3235a5c43ef396ac  triple.txt
+bd1259b7714e0402f3ca67b566a28ee31d57e698  dir1/sha1_to_ignore.txt
+bd1259b7714e0402f3ca67b566a28ee31d57e698  dir2/sha1_to_ignore.txt
+e6e8ea7465f12e4d3b5a067a4c4dc698436b3478  dir1/toto.txt
+e6e8ea7465f12e4d3b5a067a4c4dc698436b3478  dir2/toto.txt

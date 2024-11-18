@@ -234,6 +234,14 @@ namespace duplication_checker
                         break;
                     case rule::t_rule_cmd::IGNORE:
                         break;
+                    case rule::t_rule_cmd::SKIP:
+                        print_items(m_output_file, m_duplicated_items);
+                        break;
+                    default:
+                        throw quicky_exception::quicky_logic_exception(R"(Unkown value ")" + rule::to_string(l_iter_rule.get_cmd()) + R"(")"
+                                                                      ,__LINE__
+                                                                      ,__FILE__
+                                                                      );
                 }
                 m_duplicated_items.clear();
                 break;
