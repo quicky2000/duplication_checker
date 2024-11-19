@@ -27,13 +27,16 @@ int main(int argc,char ** argv)
         parameter_manager::parameter_manager l_param_manager("duplication_checker.exe", "--", 0);
         parameter_manager::parameter_if l_input_dir_param("input_dir", true);
         l_param_manager.add(l_input_dir_param);
+        parameter_manager::parameter_if l_interactive_param("interactive", true);
+        l_param_manager.add(l_interactive_param);
 
         // Treating parameters
         l_param_manager.treat_parameters(argc,argv);
 
         std::string l_input_dir = l_input_dir_param.value_set() ? l_input_dir_param.get_value<std::string>() : ".";
+        bool l_interactive = l_interactive_param.value_set() ? l_interactive_param.get_value<bool>() : false;
 
-        duplication_checker::duplication_checker l_checker(l_input_dir);
+        duplication_checker::duplication_checker l_checker(l_input_dir, l_interactive);
         l_checker.run();
     }
     catch(const quicky_exception::quicky_logic_exception & e)

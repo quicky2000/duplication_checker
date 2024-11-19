@@ -38,7 +38,9 @@ namespace duplication_checker
     public:
 
         inline
-        duplication_checker(const std::string & p_input_dir);
+        duplication_checker(const std::string & p_input_dir
+                           ,bool p_interactive
+                           );
 
         inline
         ~duplication_checker();
@@ -108,10 +110,18 @@ namespace duplication_checker
          * String to define which path to ignore
          */
         std::set<std::string> m_path_ignore_list;
+
+        bool m_interactive;
+
+        bool m_exit;
     };
 
     //-------------------------------------------------------------------------
-    duplication_checker::duplication_checker(const std::string &p_input_dir)
+    duplication_checker::duplication_checker(const std::string &p_input_dir
+                                            ,bool p_interactive
+                                            )
+    :m_interactive{p_interactive}
+    ,m_exit{false}
     {
         std::string l_input_file_name = p_input_dir + "/sorted_sha1sum.log";
         m_input_file.open(l_input_file_name);
@@ -154,7 +164,7 @@ namespace duplication_checker
     duplication_checker::run()
     {
         std::string l_previous_sha1;
-        while(!m_input_file.eof())
+        while(!m_input_file.eof() && !m_exit)
         {
             std::string l_line;
             getline(m_input_file, l_line);
@@ -276,13 +286,52 @@ namespace duplication_checker
         }
         if(!l_matched)
         {
+            print_items(m_output_file, m_duplicated_items);
+            if(m_interactive)
+            {
+                std::cout << m_duplicated_items[0].get_path() << std::endl;
+                std::cout << m_duplicated_items[1].get_path() << std::endl;
+                bool l_valid_cmd = true;
+                rule::t_rule_cmd l_cmd;
+                do
+                {
+                    std::cout << "Create a rule ? [s/i/rf/rs/q]" << std::endl;
+                    std::string l_choice;
+                    std::cin >> l_choice;
+                    if(l_choice == "s" || l_choice.empty())
+                    {
+                        l_cmd = rule::t_rule_cmd::SKIP;
+                    }
+                    else if(l_choice == "i")
+                    {
+                        l_cmd = rule::t_rule_cmd::IGNORE;
+                    }
+                    else if(l_choice == "rf")
+                    {
+                        l_cmd = rule::t_rule_cmd::RM_FIRST;
+                    }
+                    else if(l_choice == "rs")
+                    {
+                        l_cmd = rule::t_rule_cmd::RM_SECOND;
+                    }
+                    else if(l_choice == "q")
+                    {
+                        m_exit = true;
+                        return;
+                    }
+                    else
+                    {
+                        l_valid_cmd = false;
+                    }
+                } while(!l_valid_cmd);
+                m_rules.emplace_back(l_cmd, m_duplicated_items[0].get_path(), m_duplicated_items[1].get_path());
+            }
             // If there were no rules propose 1 that do nothing
-            if(m_proposed_rules.end() == m_proposed_rules.find(make_pair(m_duplicated_items[0].get_path(), m_duplicated_items[1].get_path())))
+            else if(m_proposed_rules.end() == m_proposed_rules.find(make_pair(m_duplicated_items[0].get_path(), m_duplicated_items[1].get_path())))
             {
                 std::cout << R"(<rule cmd="IGNORE" file1=")" << m_duplicated_items[0].get_path() << R"(" file2=")" << m_duplicated_items[1].get_path() << R"(" />)" << std::endl;
                 m_proposed_rules.insert(make_pair(m_duplicated_items[0].get_path(), m_duplicated_items[1].get_path()));
             }
-            print_items(m_output_file, m_duplicated_items);
         }
     }
 
