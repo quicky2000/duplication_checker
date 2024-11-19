@@ -32,32 +32,38 @@ namespace duplication_checker
 
       public:
 
-        inline explicit
-        keep_only(std::string p_name);
+        inline
+        keep_only() = default;
 
         inline
         void add_to_remove(const std::string & p_name);
 
         inline
+        void add_to_keep(const std::string & p_name);
+
+        inline
         bool match(const std::vector<std::string> & p_list);
 
         inline
-        bool is_to_keep(const std::string & p_name);
+        bool is_to_keep(const std::string & p_name) const;
 
         inline
-        const std::string &
-        get_to_keep() const;
+        bool is_to_remove(const std::string & p_name) const;
 
         inline
         void
         apply_to_remove(std::function<void(const std::string &)> & p_func) const;
 
-      private:
+        inline
+        void
+        apply_to_keep(std::function<void(const std::string &)> & p_func) const;
+
+    private:
 
         /**
          * Path tho keep
          */
-        std::string m_to_keep;
+        std::set<std::string> m_to_keep;
 
         /**
          * Paths to remove
@@ -66,53 +72,53 @@ namespace duplication_checker
     };
 
     //-------------------------------------------------------------------------
-    keep_only::keep_only(std::string p_name)
-    : m_to_keep(std::move(p_name))
+    void
+    keep_only::add_to_remove(const std::string & p_name)
     {
-
+        assert(m_to_keep.end() == m_to_keep.find(p_name));
+        assert(m_to_remove.end() == m_to_remove.find(p_name));
+        m_to_remove.insert(p_name);
     }
 
     //-------------------------------------------------------------------------
     void
-    keep_only::add_to_remove(const std::string & p_name)
+    keep_only::add_to_keep(const std::string & p_name)
     {
-        assert(p_name != m_to_keep);
-        auto l_iter = m_to_remove.find(p_name);
-        assert(m_to_remove.end() == l_iter);
-        m_to_remove.insert(p_name);
+        assert(m_to_keep.end() == m_to_keep.find(p_name));
+        assert(m_to_remove.end() == m_to_remove.find(p_name));
+        m_to_keep.insert(p_name);
     }
 
     //-------------------------------------------------------------------------
     bool
     keep_only::match(const std::vector<std::string> & p_list)
     {
-        if(p_list.size() != (m_to_remove.size() + 1))
+        if(p_list.size() != (m_to_remove.size() + m_to_keep.size()))
         {
             return false;
         }
-        unsigned int l_not_matching = p_list.size();
-        for(auto const & l_iter: p_list)
-        {
-            if(l_iter == m_to_keep || m_to_remove.end() != m_to_remove.find(l_iter))
-            {
-                --l_not_matching;
-            }
-        }
-        return 0 == l_not_matching;
+        return std::all_of(p_list.begin()
+                          , p_list.end()
+                          , [&](const std::string & p_str) -> bool
+                           {
+                               return m_to_keep.end() != m_to_keep.find(p_str) ||
+                               m_to_remove.end() != m_to_remove.find(p_str);
+                           }
+                          );
     }
 
     //-------------------------------------------------------------------------
     bool
-    keep_only::is_to_keep(const std::string & p_name)
+    keep_only::is_to_keep(const std::string & p_name) const
     {
-        return p_name == m_to_keep;
+        return m_to_keep.end() != m_to_keep.find(p_name);
     }
 
     //-------------------------------------------------------------------------
-    const std::string &
-    keep_only::get_to_keep() const
+    bool
+    keep_only::is_to_remove(const std::string & p_name) const
     {
-        return m_to_keep;
+        return m_to_remove.end() != m_to_remove.find(p_name);
     }
 
     //-------------------------------------------------------------------------
@@ -120,6 +126,16 @@ namespace duplication_checker
     keep_only::apply_to_remove(std::function<void(const std::string &)> & p_func) const
     {
         for(const auto & l_iter: m_to_remove)
+        {
+            p_func(l_iter);
+        }
+    }
+
+    //-------------------------------------------------------------------------
+    void
+    keep_only::apply_to_keep(std::function<void(const std::string &)> & p_func) const
+    {
+        for(const auto & l_iter: m_to_keep)
         {
             p_func(l_iter);
         }

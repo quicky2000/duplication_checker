@@ -49,6 +49,7 @@ namespace duplication_checker
         void treat_rule(const XMLNode & p_node);
         void treat_keep_only(const XMLNode & p_node);
         void treat_remove(const XMLNode & p_node);
+        void treat_keep(const XMLNode & p_node);
         void treat_ignore(const XMLNode & p_node);
 
         inline
@@ -140,11 +141,16 @@ namespace duplication_checker
         {
             treat_remove(p_node);
         }
+        else if("keep" == l_node_type)
+        {
+            treat_keep(p_node);
+        }
         else if("duplication_checker" == l_node_type ||
                 "rules" == l_node_type ||
                 "sha1_ignore_list" == l_node_type ||
                 "path_ignore_list" == l_node_type ||
                 "keep_only_list" == l_node_type ||
+                "keep_list" == l_node_type ||
                 "remove_list"  == l_node_type
                )
         {
@@ -219,20 +225,24 @@ namespace duplication_checker
     void
     config_parser::treat_keep_only(const XMLNode & p_node)
     {
-        std::string l_path_to_keep = get_mandatory_attribute(p_node, "path");
         int l_nb_child = p_node.nChildNode();
-        if(1 != l_nb_child)
+        if(2 != l_nb_child)
         {
-            throw quicky_exception::quicky_logic_exception("Node keep_only should have on child instead of " + std::to_string(l_nb_child), __LINE__, __FILE__);
+            throw quicky_exception::quicky_logic_exception("Node keep_only should have 2 children instead of " + std::to_string(l_nb_child), __LINE__, __FILE__);
         }
-        const XMLNode & l_child_node = p_node.getChildNode(0);
-        std::string l_child_name = l_child_node.getName();
+        std::string l_child_name = p_node.getChildNode(0).getName();
+        if("keep_list" != l_child_name)
+        {
+            throw quicky_exception::quicky_logic_exception(R"(Node keep_only first child should be name "keep_list" instead of ")" + l_child_name + R"(")", __LINE__, __FILE__);
+        }
+        l_child_name = p_node.getChildNode(1).getName();
         if("remove_list" != l_child_name)
         {
-            throw quicky_exception::quicky_logic_exception(R"(Node keep_only child should be name "remove_list" instead of ")" + l_child_name + R"(")", __LINE__, __FILE__);
+            throw quicky_exception::quicky_logic_exception(R"(Node keep_only second child should be name "remove_list" instead of ")" + l_child_name + R"(")", __LINE__, __FILE__);
         }
-        m_keep_only.emplace_back(l_path_to_keep);
-        treat(l_child_node);
+        m_keep_only.emplace_back();
+        treat(p_node.getChildNode(0));
+        treat(p_node.getChildNode(1));
     }
 
     //-------------------------------------------------------------------------
@@ -242,6 +252,15 @@ namespace duplication_checker
         std::string l_path = get_mandatory_attribute(p_node, "path");
         assert(!m_keep_only.empty());
         m_keep_only.back().add_to_remove(l_path);
+    }
+
+    //-------------------------------------------------------------------------
+    void
+    config_parser::treat_keep(const XMLNode & p_node)
+    {
+        std::string l_path = get_mandatory_attribute(p_node, "path");
+        assert(!m_keep_only.empty());
+        m_keep_only.back().add_to_keep(l_path);
     }
 
 }

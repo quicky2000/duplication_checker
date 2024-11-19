@@ -4,7 +4,10 @@
 		<ignore sha1="bd1259b7714e0402f3ca67b566a28ee31d57e698"/>
 	</sha1_ignore_list>
 	<keep_only_list>
-		<keep_only path="dir2">
+		<keep_only>
+			<keep_list>
+				<keep path="dir2"/>
+			</keep_list>
 			<remove_list>
 				<remove path=""/>
 				<remove path="dir1"/>

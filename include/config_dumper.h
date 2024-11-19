@@ -89,14 +89,18 @@ namespace duplication_checker
             for(const auto & l_iter: p_keep_only)
             {
                 XMLNode l_node = l_list.addChild("keep_only");
-                l_node.addAttribute("path", l_iter.get_to_keep().c_str());
-                XMLNode l_remove_list = l_node.addChild("remove_list");
-                std::function<void(const std::string & p_str)> l_func = [&](const std::string & p_str) -> void
+                XMLNode l_keep_list = l_node.addChild("keep_list");
+                std::function<void(const std::string & p_str)> l_keep_func = [&](const std::string & p_str) -> void
                 {
-                    XMLNode l_remove_node = l_remove_list.addChild("remove");
-                    l_remove_node.addAttribute("path", p_str.c_str());
+                    l_keep_list.addChild("keep").addAttribute("path", p_str.c_str());
                 };
-                l_iter.apply_to_remove(l_func);
+                l_iter.apply_to_keep(l_keep_func);
+                XMLNode l_remove_list = l_node.addChild("remove_list");
+                std::function<void(const std::string & p_str)> l_rm_func = [&](const std::string & p_str) -> void
+                {
+                    l_remove_list.addChild("remove").addAttribute("path", p_str.c_str());
+                };
+                l_iter.apply_to_remove(l_rm_func);
             }
         }
         l_root.writeToFile(p_file_name.c_str());

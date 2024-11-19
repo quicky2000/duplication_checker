@@ -71,6 +71,12 @@ namespace duplication_checker
                    ,const std::string & p_keep
                    );
 
+        inline
+        void
+        generate_rm(const std::vector<std::string> & p_remove
+                   ,const std::vector<std::string> & p_keep
+                   );
+
         std::ifstream m_input_file;
 
         /**
@@ -228,6 +234,36 @@ namespace duplication_checker
 
     //-------------------------------------------------------------------------
     void
+    duplication_checker::generate_rm(const std::vector<std::string> & p_remove
+                                    ,const std::vector<std::string> & p_keep
+                                    )
+    {
+        m_output_cmd_file << "ok_to_rm=1" << std::endl;
+        for(const auto & l_iter: p_keep)
+        {
+            m_output_cmd_file << std::endl << R"(# Keep only : ")" << l_iter << R"(")" << std::endl;
+            m_output_cmd_file << "if [ ! -f " << l_iter << " -o -L " << l_iter << " ]" << std::endl;
+            m_output_cmd_file << "then" << std::endl;
+            m_output_cmd_file << "    ok_to_rm=0" << std::endl;
+            m_output_cmd_file << "    if [ ! -f " << l_iter << " ]" << std::endl;
+            m_output_cmd_file << "    then" << std::endl;
+            m_output_cmd_file << R"(        echo "File )" << l_iter << R"( is missing")" << std::endl;
+            m_output_cmd_file << "    else" << std::endl;
+            m_output_cmd_file << R"(        echo "File )" << l_iter << R"( is a link")" << std::endl;
+            m_output_cmd_file << "    fi" << std::endl;
+            m_output_cmd_file << "fi" << std::endl;
+        }
+        m_output_cmd_file << "if [ $ok_to_rm -eq 1  ]" << std::endl;
+        m_output_cmd_file << "then" << std::endl;
+        for(const auto & l_iter: p_remove)
+        {
+            m_output_cmd_file << "    rm " << l_iter << std::endl;
+        }
+        m_output_cmd_file << "fi" << std::endl;
+    }
+
+    //-------------------------------------------------------------------------
+    void
     duplication_checker::process_duplicated()
     {
         // 2 items with same Sha1
@@ -356,21 +392,20 @@ namespace duplication_checker
             {
                 l_matched = true;
                 // If there is a rule generate the corresponding commands
+                std::vector<std::string> l_to_keep;
+                std::vector<std::string> l_to_remove;
                 for(auto const & l_iter_item:m_duplicated_items)
                 {
                     if(l_iter.is_to_keep(l_iter_item.get_path()))
                     {
-                        m_output_cmd_file << std::endl << R"(# Keep only : ")" << l_iter_item.get_complete_filename() << R"(")" << std::endl;
-                        break;
+                        l_to_keep.emplace_back(l_iter_item.get_complete_filename());
                     }
-                }
-                for(auto const & l_iter_item:m_duplicated_items)
-                {
-                    if(!l_iter.is_to_keep(l_iter_item.get_path()))
+                    else
                     {
-                        m_output_cmd_file << "rm " << l_iter_item.get_despecialised_complete_filename() << std::endl;
+                        l_to_remove.emplace_back(l_iter_item.get_complete_filename());
                     }
                 }
+                generate_rm(l_to_remove, l_to_keep);
                 break;
             }
         }
