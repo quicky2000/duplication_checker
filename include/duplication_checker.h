@@ -63,6 +63,12 @@ namespace duplication_checker
         void
         process_duplicated_list();
 
+        inline
+        void
+        generate_rm(const std::string & p_remove
+                   ,const std::string & p_keep
+                   );
+
         std::ifstream m_input_file;
 
         /**
@@ -195,6 +201,23 @@ namespace duplication_checker
 
     //-------------------------------------------------------------------------
     void
+    duplication_checker::generate_rm(const std::string & p_remove
+                                    ,const std::string & p_keep
+                                    )
+    {
+        m_output_cmd_file << "if [ ! -L " << p_keep << " -a -f " << p_keep << " ]" << std::endl;
+        m_output_cmd_file << "then" << std::endl;
+        m_output_cmd_file << "    rm " << p_remove << std::endl;
+        m_output_cmd_file << "elif [ -L " << p_keep << "  ]" << std::endl;
+        m_output_cmd_file << "then" << std::endl;
+        m_output_cmd_file << R"(    echo ")" << p_keep << R"(" is a link)" << std::endl;
+        m_output_cmd_file << "else" << std::endl;
+        m_output_cmd_file << R"(    echo ")" << p_keep << R"(" do not exist)" << std::endl;
+        m_output_cmd_file << "fi" << std::endl;
+    }
+
+    //-------------------------------------------------------------------------
+    void
     duplication_checker::process_duplicated()
     {
         // 2 items with same Sha1
@@ -225,12 +248,16 @@ namespace duplication_checker
                 switch(l_iter_rule.get_cmd())
                 {
                     case rule::t_rule_cmd::RM_FIRST:
-                        m_output_cmd_file << std::endl << "# Rule : \"" << l_iter_rule.get_path_1() << "\" \"" << l_iter_rule.get_path_2() << "\"" << std::endl;
-                        m_output_cmd_file << "rm " << m_duplicated_items[0].get_despecialised_complete_filename() << std::endl;
+                        m_output_cmd_file << std::endl << "# Rule : RM_FIRST \"" << l_iter_rule.get_path_1() << "\" \"" << l_iter_rule.get_path_2() << "\"" << std::endl;
+                        generate_rm(m_duplicated_items[0].get_despecialised_complete_filename()
+                                   , m_duplicated_items[1].get_despecialised_complete_filename()
+                                   );
                         break;
                     case rule::t_rule_cmd::RM_SECOND:
-                        m_output_cmd_file << std::endl << "# Rule : \"" << l_iter_rule.get_path_1() << "\" \"" << l_iter_rule.get_path_2() << "\"" << std::endl;
-                        m_output_cmd_file << "rm " << m_duplicated_items[1].get_despecialised_complete_filename() << std::endl;
+                        m_output_cmd_file << std::endl << "# Rule : RM_SECOND \"" << l_iter_rule.get_path_1() << "\" \"" << l_iter_rule.get_path_2() << "\"" << std::endl;
+                        generate_rm(m_duplicated_items[1].get_despecialised_complete_filename()
+                                   , m_duplicated_items[0].get_despecialised_complete_filename()
+                                   );
                         break;
                     case rule::t_rule_cmd::IGNORE:
                         break;
