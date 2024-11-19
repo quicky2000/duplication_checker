@@ -398,11 +398,11 @@ namespace duplication_checker
                 {
                     if(l_iter.is_to_keep(l_iter_item.get_path()))
                     {
-                        l_to_keep.emplace_back(l_iter_item.get_complete_filename());
+                        l_to_keep.emplace_back(l_iter_item.get_despecialised_complete_filename());
                     }
                     else
                     {
-                        l_to_remove.emplace_back(l_iter_item.get_complete_filename());
+                        l_to_remove.emplace_back(l_iter_item.get_despecialised_complete_filename());
                     }
                 }
                 generate_rm(l_to_remove, l_to_keep);
