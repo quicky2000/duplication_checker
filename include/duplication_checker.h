@@ -325,8 +325,8 @@ namespace duplication_checker
             print_items(m_output_file, m_duplicated_items);
             if(m_interactive)
             {
-                std::cout << m_duplicated_items[0].get_path() << std::endl;
-                std::cout << m_duplicated_items[1].get_path() << std::endl;
+                std::cout << m_duplicated_items[0].get_complete_filename() << std::endl;
+                std::cout << m_duplicated_items[1].get_complete_filename() << std::endl;
                 bool l_valid_cmd = true;
                 rule::t_rule_cmd l_cmd;
                 do
