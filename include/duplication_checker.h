@@ -327,10 +327,11 @@ namespace duplication_checker
             {
                 std::cout << m_duplicated_items[0].get_complete_filename() << std::endl;
                 std::cout << m_duplicated_items[1].get_complete_filename() << std::endl;
-                bool l_valid_cmd = true;
+                bool l_valid_cmd;
                 rule::t_rule_cmd l_cmd;
                 do
                 {
+                    l_valid_cmd = true;
                     std::cout << "Create a rule ? [s/i/rf/rs/q]" << std::endl;
                     std::string l_choice;
                     std::cin >> l_choice;
@@ -413,6 +414,104 @@ namespace duplication_checker
         if(!l_matched)
         {
             print_items(m_output_file, m_duplicated_items);
+            if(m_interactive)
+            {
+                for(const auto & l_iter:m_duplicated_items)
+                {
+                    std::cout << l_iter.get_sha1() << " " << l_iter.get_complete_filename() << std::endl;
+                }
+                bool l_valid_choice;
+                do
+                {
+                    l_valid_choice = true;
+                    std::cout << "Create a rule ? [c/i/s/k/r/q/h]" << std::endl;
+                    std::string l_choice;
+                    std::cin >> l_choice;
+                    if(l_choice == "h")
+                    {
+                        std::cout << "c - choose for each file" << std::endl;
+                        std::cout << "i - ignore sha1" << std::endl;
+                        std::cout << "s - decide later" << std::endl;
+                        std::cout << "k - keep all" << std::endl;
+                        std::cout << "r - rm all" << std::endl;
+                        std::cout << "q - quit" << std::endl;
+                        std::cout << "h - print this help" << std::endl;
+                        l_valid_choice = false;
+                    }
+                    else if(l_choice == "i")
+                    {
+                        m_sha1_ignore_list.insert(m_duplicated_items[0].get_sha1());
+                        return;
+                    }
+                    else if(l_choice == "s")
+                    {
+                        return;
+                    }
+                    else if(l_choice == "k")
+                    {
+                        m_keep_only.emplace_back();
+                        for(const auto & l_iter: m_duplicated_items)
+                        {
+                            m_keep_only.back().add_to_keep(l_iter.get_path());
+                        }
+                        return;
+                    }
+                    else if(l_choice == "r")
+                    {
+                        m_keep_only.emplace_back();
+                        for(const auto & l_iter: m_duplicated_items)
+                        {
+                            m_keep_only.back().add_to_remove(l_iter.get_path());
+                        }
+                        return;
+                    }
+                    else if(l_choice == "q")
+                    {
+                        m_exit = true;
+                        return;
+                    }
+                    else if(std::string::npos == std::string("ciskrqh").find(l_choice))
+                    {
+                        l_valid_choice = false;
+                    }
+                } while(!l_valid_choice);
+                // We are there if we have choosen to deal for each file
+                m_keep_only.emplace_back();
+                std::string l_choice;
+                for(const auto & l_iter: m_duplicated_items)
+                {
+                    if(l_choice != "R" && l_choice != "K")
+                    {
+                        std::cout << l_iter.get_sha1() << " " << l_iter.get_complete_filename() << std::endl;
+                        do
+                        {
+                            l_valid_choice = true;
+                            std::cout << "Action for this path ? [k/K/r/R/h]" << std::endl;
+                            std::cin >> l_choice;
+                            if (l_choice == "h")
+                            {
+                                std::cout << "k - keep this path" << std::endl;
+                                std::cout << "K - keep this path and all the following" << std::endl;
+                                std::cout << "r - rm this path" << std::endl;
+                                std::cout << "R - rm this path and all the following" << std::endl;
+                                std::cout << "h - print this help" << std::endl;
+                            }
+                            else if (std::string::npos == std::string("kKrRh").find(l_choice))
+                            {
+                                l_valid_choice = false;
+                            }
+                        } while (!l_valid_choice);
+                    }
+                    if(l_choice == "R" || l_choice == "r")
+                    {
+                        m_keep_only.back().add_to_remove(l_iter.get_path());
+                    }
+                    if(l_choice == "K" || l_choice == "k")
+                    {
+                        m_keep_only.back().add_to_keep(l_iter.get_path());
+                    }
+                }
+            }
         }
     }
 
