@@ -323,7 +323,8 @@ namespace duplication_checker
         if(!l_matched)
         {
             print_items(m_output_file, m_duplicated_items);
-            if(m_interactive)
+            // No interactive mode when both have same path because it is not possible to know which one to choose based on the path !
+            if(m_interactive && m_duplicated_items[0].get_path() != m_duplicated_items[1].get_path())
             {
                 std::cout << m_duplicated_items[0].get_complete_filename() << std::endl;
                 std::cout << m_duplicated_items[1].get_complete_filename() << std::endl;
