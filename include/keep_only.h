@@ -75,8 +75,8 @@ namespace duplication_checker
     void
     keep_only::add_to_remove(const std::string & p_name)
     {
+        // Ensure there is no contradiction
         assert(m_to_keep.end() == m_to_keep.find(p_name));
-        assert(m_to_remove.end() == m_to_remove.find(p_name));
         m_to_remove.insert(p_name);
     }
 
@@ -84,7 +84,7 @@ namespace duplication_checker
     void
     keep_only::add_to_keep(const std::string & p_name)
     {
-        assert(m_to_keep.end() == m_to_keep.find(p_name));
+        // Ensure there is no contradiction
         assert(m_to_remove.end() == m_to_remove.find(p_name));
         m_to_keep.insert(p_name);
     }
