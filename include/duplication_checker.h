@@ -103,7 +103,7 @@ namespace duplication_checker
         /**
          * Hash to ignore
          */
-        std::set<std::string> m_sha1_ignore_list;
+        std::map<std::string, std::string> m_sha1_ignore_list;
 
         std::vector<item> m_duplicated_items;
 
@@ -204,6 +204,10 @@ namespace duplication_checker
                     {
                         m_duplicated_items.emplace_back(l_sha1, l_complete_filename);
                     }
+                }
+                else if(m_sha1_ignore_list[l_sha1].empty())
+                {
+                    m_sha1_ignore_list[l_sha1] = l_complete_filename;
                 }
             }
             else if(m_duplicated_items.size() >= 2)
@@ -441,7 +445,9 @@ namespace duplication_checker
                     }
                     else if(l_choice == "i")
                     {
-                        m_sha1_ignore_list.insert(m_duplicated_items[0].get_sha1());
+                        m_sha1_ignore_list.insert(std::make_pair(m_duplicated_items[0].get_sha1()
+                                                                   ,m_duplicated_items[0].get_filename())
+                                                                   );
                         return;
                     }
                     else if(l_choice == "s")

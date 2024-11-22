@@ -34,7 +34,7 @@ namespace duplication_checker
       public:
 
         config_parser( std::vector<rule> & p_rules
-                     , std::set<std::string> & p_sha1_ignore_list
+                     , std::map<std::string, std::string> & p_sha1_ignore_list
                      , std::vector<keep_only> & p_keep_only
                      , std::set<std::string> & p_path_ignore_list
                      );
@@ -63,14 +63,14 @@ namespace duplication_checker
                                );
 
         std::vector<rule> & m_rules;
-        std::set<std::string> & m_sha1_ignore_list;
+        std::map<std::string, std::string> & m_sha1_ignore_list;
         std::vector<keep_only> & m_keep_only;
         std::set<std::string> & m_path_ignore_list;
     };
 
     //-------------------------------------------------------------------------
     config_parser::config_parser( std::vector<rule> & p_rules
-                                , std::set<std::string> & p_sha1_ignore_list
+                                , std::map<std::string, std::string> & p_sha1_ignore_list
                                 , std::vector<keep_only> & p_keep_only
                                 , std::set<std::string> & p_path_ignore_list
                                 )
@@ -193,7 +193,8 @@ namespace duplication_checker
     config_parser::treat_ignore(const XMLNode & p_node)
     {
         std::string l_sha1_attribute = get_mandatory_attribute(p_node, "sha1");
-        m_sha1_ignore_list.emplace(l_sha1_attribute);
+        std::string l_comment = p_node.getAttribute("comment") != nullptr ? p_node.getAttribute("comment") : "";
+        m_sha1_ignore_list.emplace(l_sha1_attribute, l_comment);
     }
 
     //-------------------------------------------------------------------------

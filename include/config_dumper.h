@@ -37,7 +37,7 @@ namespace duplication_checker
         dump(const std::string & p_file_name
             ,const std::vector<rule> & p_rules
             ,const std::vector<keep_only> & p_keep_only
-            ,const std::set<std::string> & p_sha1_ignore_list
+            ,const std::map<std::string, std::string> & p_sha1_ignore_list
             ,const std::set<std::string> & p_path_ignore_list
             );
 
@@ -49,7 +49,7 @@ namespace duplication_checker
     config_dumper::dump(const std::string & p_file_name
                        ,const std::vector<rule> & p_rules
                        ,const std::vector<keep_only> & p_keep_only
-                       ,const std::set<std::string> & p_sha1_ignore_list
+                       ,const std::map<std::string, std::string> & p_sha1_ignore_list
                        ,const std::set<std::string> & p_path_ignore_list
                        )
     {
@@ -60,7 +60,8 @@ namespace duplication_checker
             for(const auto & l_iter: p_sha1_ignore_list)
             {
                 XMLNode l_node = l_list.addChild("ignore");
-                l_node.addAttribute("sha1", l_iter.c_str());
+                l_node.addAttribute("sha1", l_iter.first.c_str());
+                l_node.addAttribute("comment", l_iter.second.c_str());
             }
         }
         if(!p_path_ignore_list.empty())

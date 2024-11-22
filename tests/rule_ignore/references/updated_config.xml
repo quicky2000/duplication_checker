@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <duplication_checker>
 	<sha1_ignore_list>
-		<ignore sha1="bd1259b7714e0402f3ca67b566a28ee31d57e698"/>
+		<ignore sha1="bd1259b7714e0402f3ca67b566a28ee31d57e698" comment="dir1/sha1_to_ignore.txt"/>
 	</sha1_ignore_list>
 	<rules>
 		<rule cmd="IGNORE" file1="dir1" file2="dir2"/>
