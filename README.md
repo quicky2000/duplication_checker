@@ -1,6 +1,6 @@
 # Duplication_checker
 
-Continuous integration with [Travis-Ci](https://travis-ci.org/quicky2000/duplication_checker) : ![Build Status](https://travis-ci.org/quicky2000/duplication_checker.svg?branch=master)
+Continuous integration with [Travis-Ci](https://app.travis-ci.com/github/quicky2000/duplication_checker) : ![Build Status](https://travis-ci.org/quicky2000/duplication_checker.svg?branch=master)
 
 Please see LICENSE for info on the license.
 
