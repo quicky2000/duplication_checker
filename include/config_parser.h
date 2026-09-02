@@ -26,6 +26,7 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <fstream>
 
 namespace duplication_checker
 {
@@ -93,7 +94,21 @@ namespace duplication_checker
 
             if(eXMLErrorFileNotFound == l_err.error)
             {
-                throw quicky_exception::quicky_runtime_exception( "File \"" + p_file_name + "\" not found"
+                std::ofstream l_empty_xml;
+                l_empty_xml.open(p_file_name, std::ios::out);
+                if(!l_empty_xml.is_open())
+                {
+                    throw quicky_exception::quicky_runtime_exception( "Empty File \"" + p_file_name + "\" cannot be created"
+                            , __LINE__
+                            , __FILE__
+                    );
+                }
+                l_empty_xml << R"(<?xml version="1.0" encoding="utf-8"?>)" << std::endl;
+                l_empty_xml << "<duplication_checker>" << std::endl;
+                l_empty_xml << "</duplication_checker>" << std::endl;
+                l_empty_xml.close();
+
+                throw quicky_exception::quicky_runtime_exception( "File \"" + p_file_name + "\" not found. Empty file has been generated."
                         , __LINE__
                         , __FILE__
                 );
